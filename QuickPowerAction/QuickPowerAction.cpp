@@ -87,6 +87,7 @@ typedef void(NTAPI* TYPE_NtInitiatePowerAction)(
 
 BOOL CApp::InitInstance()
 {
+BEGIN:
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
 	//则需要 InitCommonControlsEx()。  否则，将无法创建窗口。
@@ -118,6 +119,8 @@ BOOL CApp::InitInstance()
 
 	CQuickPowerActionDlg dlg;
 	m_pMainWnd = &dlg;
+	dlg.usedll = -1;
+	dlg.sleepmode = -1;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{
@@ -126,7 +129,11 @@ BOOL CApp::InitInstance()
 		switch (dlg.option) {
 		case OPT_SHUTDOWN:
 		case OPT_REBOOT:
-			if (dlg.usedll) {
+			if (dlg.usedll == -1) {
+				MessageBoxA(NULL,"请选择操作方式！","关闭 Windows",MB_OK|MB_ICONERROR);
+				//goto BEGIN;
+			}
+			else if (dlg.usedll) {
 				TYPE_NtShutdownSystem NtShutdownSystem = (TYPE_NtShutdownSystem)GetProcAddress(hDll, "NtShutdownSystem");
 				NtShutdownSystem(dlg.option == OPT_SHUTDOWN ? 0 : 1);
 			}
@@ -149,8 +156,12 @@ BOOL CApp::InitInstance()
 			case 3:
 				NtInitiatePowerAction(PowerActionSleep, PowerSystemSleeping3, 0, TRUE);
 				break;
+			case -1:
+				MessageBoxA(NULL, "请选择睡眠深度！", "关闭 Windows", MB_OK | MB_ICONERROR);
+				//goto BEGIN;
+				break;
 			default:
-				MessageBox(NULL,_T("未知错误"),_T("关闭 Windows"),MB_ICONERROR|MB_OK);
+				MessageBox(NULL,_T("未知错误！"),_T("关闭 Windows"),MB_ICONERROR|MB_OK);
 			}
 			break;
 		}

@@ -1,4 +1,3 @@
 ﻿  QuickPowerAction.cpp
-  QuickPowerActionDlg.cpp
-  正在生成代码...
-  QuickPowerAction.vcxproj -> F:\C++\QuickPowerAction\x64\Debug\QuickPowerAction.exe
+F:\QuickPowerAction\QuickPowerAction.cpp(90,6): warning C4102: “BEGIN”: 未引用的标签
+  QuickPowerAction.vcxproj -> F:\QuickPowerAction\x64\Debug\QuickPowerAction.exe

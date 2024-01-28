@@ -46,7 +46,7 @@ public:
 	afx_msg void OnBnClickedHiber();
 
 public:
-	int option = 0, sleepmode=1, usedll;
+	int option = 0, sleepmode=-1, usedll=-1;
 	afx_msg void OnCbnSelchangeCombo1();
 	CComboBox List2;
 	afx_msg void OnCbnSelchangeCombo2();
