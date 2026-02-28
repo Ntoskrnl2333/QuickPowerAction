@@ -29,7 +29,7 @@ public:
 		ER_Success,
 		ER_UnknownError,
 		ER_OutOfMemory,
-		ER_BadOption,
+		ER_BadArguments,
 		ER_PowerActionNotSupported,
 		ER_NoPrivilege,
 		ER_CannotLoadDLL,
