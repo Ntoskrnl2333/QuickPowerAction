@@ -54,7 +54,7 @@ public:
 	PowerAction GetPowerAction()const;
 	SleepMode GetSleepMode()const;
 private:
-	bool m_force;
+	bool m_curisforce;
 	PowerAction m_curaction;
 	SleepMode m_cursleep;
 };
