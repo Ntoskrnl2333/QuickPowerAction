@@ -6,3 +6,26 @@ CoreLayer::CoreLayer() {
 	m_curaction = PA_None;
 	m_cursleep = SM_None;
 }
+
+CoreLayer::ExecResult CoreLayer::SetIsForce(bool force) {
+	m_curisforce = force;
+	return ER_Success;
+}
+
+CoreLayer::ExecResult CoreLayer::SetPowerAction(CoreLayer::PowerAction pa) {
+	if (pa >= PA_None && pa <= PA_Hibernate) {
+		m_curaction = pa;
+		return ER_Success;
+	}
+	else
+		return ER_BadArguments;
+}
+
+CoreLayer::ExecResult CoreLayer::SetSleepMode(CoreLayer::SleepMode sm) {
+	if (sm >= SM_None && sm <= SM_S3) {
+		m_cursleep = sm;
+		return ER_Success;
+	}
+	else
+		return ER_BadArguments;
+}
