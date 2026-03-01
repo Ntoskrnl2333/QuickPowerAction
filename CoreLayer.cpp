@@ -29,3 +29,15 @@ CoreLayer::ExecResult CoreLayer::SetSleepMode(CoreLayer::SleepMode sm) {
 	else
 		return ER_BadArguments;
 }
+
+bool CoreLayer::GetIsForce() const {
+	return m_curisforce;
+}
+
+CoreLayer::PowerAction CoreLayer::GetPowerAction() const {
+	return m_curaction;
+}
+
+CoreLayer::SleepMode CoreLayer::GetSleepMode() const {
+	return m_cursleep;
+}
