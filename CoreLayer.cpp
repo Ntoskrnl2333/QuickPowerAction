@@ -90,3 +90,22 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 
     return ERROR_SUCCESS;
 }
+
+CoreLayer::ExecResult CoreLayer::GetPrivilege() {
+	DWORD ret = SysAdjustPrivilege("SeShutdownPrivilege", TRUE);
+	switch (ret) {
+	case ERROR_SUCCESS:
+		return ER_Success;
+	case ERROR_NOT_ALL_ASSIGNED:
+		return ER_NoPrivilege;
+	case ERROR_INVALID_PARAMETER:
+	case ERROR_NO_SUCH_PRIVILEGE:
+		return ER_BadArguments;
+	case ERROR_OUTOFMEMORY:
+		return ER_OutOfMemory;
+	case ERROR_ACCESS_DENIED:
+		return ER_NoPrivilege;
+	default:
+		return ER_UnknownError;
+	}
+}
