@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <windows.h>
 
 class CoreLayer
 {
@@ -57,5 +58,7 @@ private:
 	bool m_curisforce;
 	PowerAction m_curaction;
 	SleepMode m_cursleep;
+
+	DWORD WINAPI SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)const;
 };
 
