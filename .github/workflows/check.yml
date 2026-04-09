@@ -1,0 +1,32 @@
+name: Check MFC Build
+
+on:
+  push:
+    branches-ignore:
+      - master
+  pull_request:
+    branches-ignore:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet (if any)
+        run: nuget restore
+
+      - name: Compile only (no link)
+        run: |
+          msbuild *.sln ^
+            /t:ClCompile ^
+            /p:Configuration=Release ^
+            /p:Platform="x64" ^
+            /m ^
+            /verbosity:minimal
