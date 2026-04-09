@@ -109,3 +109,139 @@ CoreLayer::ExecResult CoreLayer::GetPrivilege() {
 		return ER_UnknownError;
 	}
 }
+
+CoreLayer::ExecResult CoreLayer::LoadDLL() {
+	HMODULE hDll = GetModuleHandleA("NtDll.dll");
+	if (hDll == NULL) {
+		return ER_CannotLoadDLL;
+	}
+	return ER_Success;
+}
+
+CoreLayer::ExecResult CoreLayer::ReachFunction() {
+	HMODULE hDll = GetModuleHandleA("NtDll.dll");
+	if (hDll == NULL) {
+		return ER_CannotLoadDLL;
+	}
+
+	FARPROC pNtShutdownSystem = GetProcAddress(hDll, "NtShutdownSystem");
+	FARPROC pNtInitiatePowerAction = GetProcAddress(hDll, "NtInitiatePowerAction");
+
+	if (pNtShutdownSystem == NULL || pNtInitiatePowerAction == NULL) {
+		return ER_CannotReachFunction;
+	}
+
+	return ER_Success;
+}
+
+typedef void(NTAPI* TYPE_NtShutdownSystem)(DWORD);
+typedef void(NTAPI* TYPE_NtInitiatePowerAction)(
+	POWER_ACTION SystemAction,
+	SYSTEM_POWER_STATE MinSystemState,
+	ULONG Flags,
+	BOOLEAN Asynchronous);
+
+CoreLayer::ExecResult CoreLayer::CallFunction() {
+	HMODULE hDll = GetModuleHandleA("NtDll.dll");
+	if (hDll == NULL) {
+		return ER_CannotLoadDLL;
+	}
+
+	switch (m_curaction) {
+	case PA_Shutdown:
+	case PA_Reboot: {
+		TYPE_NtShutdownSystem NtShutdownSystem = 
+			(TYPE_NtShutdownSystem)GetProcAddress(hDll, "NtShutdownSystem");
+		if (NtShutdownSystem == NULL) {
+			return ER_CannotReachFunction;
+		}
+		NtShutdownSystem(m_curaction == PA_Shutdown ? 0 : 1);
+		break;
+	}
+	case PA_Sleep: {
+		TYPE_NtInitiatePowerAction NtInitiatePowerAction = 
+			(TYPE_NtInitiatePowerAction)GetProcAddress(hDll, "NtInitiatePowerAction");
+		if (NtInitiatePowerAction == NULL) {
+			return ER_CannotReachFunction;
+		}
+
+		SYSTEM_POWER_STATE sleepState = PowerSystemSleeping1;
+		switch (m_cursleep) {
+		case SM_S1:
+			sleepState = PowerSystemSleeping1;
+			break;
+		case SM_S2:
+			sleepState = PowerSystemSleeping2;
+			break;
+		case SM_S3:
+			sleepState = PowerSystemSleeping3;
+			break;
+		default:
+			return ER_BadArguments;
+		}
+
+		NtInitiatePowerAction(PowerActionSleep, sleepState, 0, TRUE);
+		break;
+	}
+	case PA_Hibernate: {
+		TYPE_NtInitiatePowerAction NtInitiatePowerAction = 
+			(TYPE_NtInitiatePowerAction)GetProcAddress(hDll, "NtInitiatePowerAction");
+		if (NtInitiatePowerAction == NULL) {
+			return ER_CannotReachFunction;
+		}
+		NtInitiatePowerAction(PowerActionHibernate, PowerSystemHibernate, 0, TRUE);
+		break;
+	}
+	default:
+		return ER_PowerActionNotSupported;
+	}
+
+	return ER_Success;
+}
+
+CoreLayer::ExecResult CoreLayer::ExecutePowerAction() {
+	if (m_curaction == PA_None) {
+		return ER_BadArguments;
+	}
+
+	if (m_curaction == PA_Sleep && m_cursleep == SM_None) {
+		return ER_BadArguments;
+	}
+
+	ExecResult ret;
+
+	ret = GetPrivilege();
+	if (ret != ER_Success) {
+		return ret;
+	}
+
+	ret = LoadDLL();
+	if (ret != ER_Success) {
+		return ret;
+	}
+
+	ret = ReachFunction();
+	if (ret != ER_Success) {
+		return ret;
+	}
+
+	ret = CallFunction();
+	return ret;
+}
+
+std::vector<CoreLayer::PowerAction> CoreLayer::GetSupportedPowerAction() {
+	return {
+		PA_Shutdown,
+		PA_Reboot,
+		PA_Sleep,
+		PA_Hibernate
+	};
+}
+
+std::vector<CoreLayer::SleepMode> CoreLayer::GetSupportedSleepMode() {
+	return {
+		SM_S1,
+		SM_S2,
+		SM_S3
+	};
+}
