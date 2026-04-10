@@ -10,7 +10,6 @@ jobs:
 build:
 runs-on: windows-latest
 
-```
 steps:
   - name: Checkout
     uses: actions/checkout@v4
@@ -23,4 +22,3 @@ steps:
 
   - name: Compile only (no link)
     run: msbuild *.sln /t:ClCompile /p:Configuration=Release /p:Platform="x64" /m /verbosity:minimal
-```
