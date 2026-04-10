@@ -16,8 +16,8 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore NuGet (if any)
-        run: nuget restore
+      - name: Restore NuGet Packages
+        run: nuget restore QuickPowerAction.sln
 
-      - name: Compile only (no link)
-        run: msbuild *.sln /t:ClCompile /p:Configuration=Release /p:Platform="x64" /m /verbosity:minimal
+      - name: Compile Only (No Link)
+        run: msbuild QuickPowerAction.sln /t:ClCompile /p:Configuration=Release /p:Platform="x64" /m /verbosity:minimal
