@@ -230,18 +230,43 @@ CoreLayer::ExecResult CoreLayer::ExecutePowerAction() {
 }
 
 std::vector<CoreLayer::PowerAction> CoreLayer::GetSupportedPowerAction() {
-	return {
-		PA_Shutdown,
-		PA_Reboot,
-		PA_Sleep,
-		PA_Hibernate
-	};
+	std::vector<PowerAction> supported;
+	SYSTEM_POWER_CAPABILITIES caps;
+
+	if (GetPwrCapabilities(&caps)) {
+		// 关机/重启通常都支持
+		supported.push_back(PA_Shutdown);
+		supported.push_back(PA_Reboot);
+
+		// 检查是否支持睡眠（S1/S2/S3 任一即可）
+		if (caps.SystemS1 || caps.SystemS2 || caps.SystemS3) {
+			supported.push_back(PA_Sleep);
+		}
+
+		// 检查是否支持休眠（需要休眠文件存在）
+		if (caps.HiberFilePresent) {
+			supported.push_back(PA_Hibernate);
+		}
+	}
+
+	return supported;
 }
 
 std::vector<CoreLayer::SleepMode> CoreLayer::GetSupportedSleepMode() {
-	return {
-		SM_S1,
-		SM_S2,
-		SM_S3
-	};
+	std::vector<SleepMode> supported;
+	SYSTEM_POWER_CAPABILITIES caps;
+
+	if (GetPwrCapabilities(&caps)) {
+		if (caps.SystemS1) {
+			supported.push_back(SM_S1);
+		}
+		if (caps.SystemS2) {
+			supported.push_back(SM_S2);
+		}
+		if (caps.SystemS3) {
+			supported.push_back(SM_S3);
+		}
+	}
+
+	return supported;
 }
