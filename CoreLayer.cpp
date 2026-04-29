@@ -231,22 +231,29 @@ CoreLayer::ExecResult CoreLayer::ExecutePowerAction() {
 
 std::vector<CoreLayer::PowerAction> CoreLayer::GetSupportedPowerAction() {
 	std::vector<PowerAction> supported;
-	SYSTEM_POWER_CAPABILITIES caps;
+	SYSTEM_POWER_CAPABILITIES caps = {};
 
-	if (GetPwrCapabilities(&caps)) {
-		// 关机/重启通常都支持
-		supported.push_back(PA_Shutdown);
-		supported.push_back(PA_Reboot);
+	// 始终支持锁屏和注销（不需要特殊硬件支持）
+	supported.push_back(PA_Lock);
+	supported.push_back(PA_Logoff);
 
-		// 检查是否支持睡眠（S1/S2/S3 任一即可）
-		if (caps.SystemS1 || caps.SystemS2 || caps.SystemS3) {
-			supported.push_back(PA_Sleep);
-		}
+	// 获取系统电源能力
+	if (!GetPwrCapabilities(&caps)) {
+		return supported;
+	}
 
-		// 检查是否支持休眠（需要休眠文件存在）
-		if (caps.HiberFilePresent) {
-			supported.push_back(PA_Hibernate);
-		}
+	// 关机/重启：需要 SE_SHUTDOWN_PRIVILEGE 权限
+	supported.push_back(PA_Shutdown);
+	supported.push_back(PA_Reboot);
+
+	// 睡眠：需要至少一种睡眠状态可用
+	if (caps.SystemS1 || caps.SystemS2 || caps.SystemS3) {
+		supported.push_back(PA_Sleep);
+	}
+
+	// 休眠：需要休眠文件存在
+	if (caps.HiberFilePresent) {
+		supported.push_back(PA_Hibernate);
 	}
 
 	return supported;
@@ -254,18 +261,21 @@ std::vector<CoreLayer::PowerAction> CoreLayer::GetSupportedPowerAction() {
 
 std::vector<CoreLayer::SleepMode> CoreLayer::GetSupportedSleepMode() {
 	std::vector<SleepMode> supported;
-	SYSTEM_POWER_CAPABILITIES caps;
+	SYSTEM_POWER_CAPABILITIES caps = {};
 
-	if (GetPwrCapabilities(&caps)) {
-		if (caps.SystemS1) {
-			supported.push_back(SM_S1);
-		}
-		if (caps.SystemS2) {
-			supported.push_back(SM_S2);
-		}
-		if (caps.SystemS3) {
-			supported.push_back(SM_S3);
-		}
+	if (!GetPwrCapabilities(&caps)) {
+		return supported;
+	}
+
+	// 按睡眠深度顺序添加支持的睡眠模式
+	if (caps.SystemS1) {
+		supported.push_back(SM_S1);
+	}
+	if (caps.SystemS2) {
+		supported.push_back(SM_S2);
+	}
+	if (caps.SystemS3) {
+		supported.push_back(SM_S3);
 	}
 
 	return supported;

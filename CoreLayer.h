@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <windows.h>
+#include <PowrProf.h>
+#pragma comment(lib, "PowrProf.lib")
+
 
 class CoreLayer
 {
