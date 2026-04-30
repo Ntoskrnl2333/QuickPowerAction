@@ -47,7 +47,7 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 	TOKEN_PRIVILEGES NewState;
 	LUID luidPrivilegeLUID;
 
-	// 1. æ‰“å¼€ tokenï¼ˆå¢åŠ  TOKEN_QUERYï¼‰
+	// 1. ´ò¿ª token£¨Ôö¼Ó TOKEN_QUERY£©
 	if (!OpenProcessToken(GetCurrentProcess(),
 		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
 		&hToken))
@@ -55,7 +55,7 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 		return GetLastError();
 	}
 
-	// 2. æŸ¥æ‰¾ LUIDï¼ˆå¿…é¡»æ£€æŸ¥ï¼‰
+	// 2. ²éÕÒ LUID£¨±ØĞë¼ì²é£©
 	if (!LookupPrivilegeValueA(NULL, lpPrivilegeName, &luidPrivilegeLUID))
 	{
 		DWORD err = GetLastError();
@@ -63,12 +63,12 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 		return err;
 	}
 
-	// 3. æ„é€ ç»“æ„ï¼ˆæ”¯æŒ enable / disable å•ä¸ªæƒé™ï¼‰
+	// 3. ¹¹Ôì½á¹¹£¨Ö§³Ö enable / disable µ¥¸öÈ¨ÏŞ£©
 	NewState.PrivilegeCount = 1;
 	NewState.Privileges[0].Luid = luidPrivilegeLUID;
 	NewState.Privileges[0].Attributes = fEnable ? SE_PRIVILEGE_ENABLED : 0;
 
-	// 4. è°ƒæ•´æƒé™
+	// 4. µ÷ÕûÈ¨ÏŞ
 	if (!AdjustTokenPrivileges(hToken, FALSE, &NewState, 0, NULL, NULL))
 	{
 		DWORD err = GetLastError();
@@ -76,15 +76,15 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 		return err;
 	}
 
-	// 5. å…³é”®ï¼šæ£€æŸ¥æ˜¯å¦çœŸçš„ç”Ÿæ•ˆ
+	// 5. ¹Ø¼ü£º¼ì²éÊÇ·ñÕæµÄÉúĞ§
 	DWORD err = GetLastError();
 
-	// 6. é‡Šæ”¾å¥æŸ„ï¼ˆé¿å…æ³„æ¼ï¼‰
+	// 6. ÊÍ·Å¾ä±ú£¨±ÜÃâĞ¹Â©£©
 	CloseHandle(hToken);
 
 	if (err == ERROR_NOT_ALL_ASSIGNED)
 	{
-		// å½“å‰ token æ²¡æœ‰è¯¥æƒé™
+		// µ±Ç° token Ã»ÓĞ¸ÃÈ¨ÏŞ
 		return err;
 	}
 
@@ -150,7 +150,7 @@ CoreLayer::ExecResult CoreLayer::CallFunction() {
 	switch (m_curaction) {
 	case PA_Shutdown:
 	case PA_Reboot: {
-		TYPE_NtShutdownSystem NtShutdownSystem = 
+		TYPE_NtShutdownSystem NtShutdownSystem =
 			(TYPE_NtShutdownSystem)GetProcAddress(hDll, "NtShutdownSystem");
 		if (NtShutdownSystem == NULL) {
 			return ER_CannotReachFunction;
@@ -159,7 +159,7 @@ CoreLayer::ExecResult CoreLayer::CallFunction() {
 		break;
 	}
 	case PA_Sleep: {
-		TYPE_NtInitiatePowerAction NtInitiatePowerAction = 
+		TYPE_NtInitiatePowerAction NtInitiatePowerAction =
 			(TYPE_NtInitiatePowerAction)GetProcAddress(hDll, "NtInitiatePowerAction");
 		if (NtInitiatePowerAction == NULL) {
 			return ER_CannotReachFunction;
@@ -184,7 +184,7 @@ CoreLayer::ExecResult CoreLayer::CallFunction() {
 		break;
 	}
 	case PA_Hibernate: {
-		TYPE_NtInitiatePowerAction NtInitiatePowerAction = 
+		TYPE_NtInitiatePowerAction NtInitiatePowerAction =
 			(TYPE_NtInitiatePowerAction)GetProcAddress(hDll, "NtInitiatePowerAction");
 		if (NtInitiatePowerAction == NULL) {
 			return ER_CannotReachFunction;
@@ -233,25 +233,25 @@ std::vector<CoreLayer::PowerAction> CoreLayer::GetSupportedPowerAction() {
 	std::vector<PowerAction> supported;
 	SYSTEM_POWER_CAPABILITIES caps = {};
 
-	// å§‹ç»ˆæ”¯æŒé”å±å’Œæ³¨é”€ï¼ˆä¸éœ€è¦ç‰¹æ®Šç¡¬ä»¶æ”¯æŒï¼‰
+	// Ê¼ÖÕÖ§³ÖËøÆÁºÍ×¢Ïú£¨²»ĞèÒªÌØÊâÓ²¼şÖ§³Ö£©
 	supported.push_back(PA_Lock);
 	supported.push_back(PA_Logoff);
 
-	// è·å–ç³»ç»Ÿç”µæºèƒ½åŠ›
+	// »ñÈ¡ÏµÍ³µçÔ´ÄÜÁ¦
 	if (!GetPwrCapabilities(&caps)) {
 		return supported;
 	}
 
-	// å…³æœº/é‡å¯ï¼šéœ€è¦ SE_SHUTDOWN_PRIVILEGE æƒé™
+	// ¹Ø»ú/ÖØÆô£ºĞèÒª SE_SHUTDOWN_PRIVILEGE È¨ÏŞ
 	supported.push_back(PA_Shutdown);
 	supported.push_back(PA_Reboot);
 
-	// ç¡çœ ï¼šéœ€è¦è‡³å°‘ä¸€ç§ç¡çœ çŠ¶æ€å¯ç”¨
+	// Ë¯Ãß£ºĞèÒªÖÁÉÙÒ»ÖÖË¯Ãß×´Ì¬¿ÉÓÃ
 	if (caps.SystemS1 || caps.SystemS2 || caps.SystemS3) {
 		supported.push_back(PA_Sleep);
 	}
 
-	// ä¼‘çœ ï¼šéœ€è¦ä¼‘çœ æ–‡ä»¶å­˜åœ¨
+	// ĞİÃß£ºĞèÒªĞİÃßÎÄ¼ş´æÔÚ
 	if (caps.HiberFilePresent) {
 		supported.push_back(PA_Hibernate);
 	}
@@ -267,7 +267,7 @@ std::vector<CoreLayer::SleepMode> CoreLayer::GetSupportedSleepMode() {
 		return supported;
 	}
 
-	// æŒ‰ç¡çœ æ·±åº¦é¡ºåºæ·»åŠ æ”¯æŒçš„ç¡çœ æ¨¡å¼
+	// °´Ë¯ÃßÉî¶ÈË³ĞòÌí¼ÓÖ§³ÖµÄË¯ÃßÄ£Ê½
 	if (caps.SystemS1) {
 		supported.push_back(SM_S1);
 	}
