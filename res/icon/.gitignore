@@ -1,0 +1,9 @@
+# Ignore temporary files and autosave files.
+
+*autosave*
+*~
+
+
+# Ignore result file.
+
+result.ico
