@@ -103,11 +103,36 @@ TEST_CASE("CoreLayer GetSupportedSleepMode") {
 
 TEST_CASE("CoreLayer ExecutePowerAction BadArguments") {
     CoreLayer layer;
-    
+
     layer.SetPowerAction(CoreLayer::PA_None);
     CHECK(layer.ExecutePowerAction() == CoreLayer::ER_BadArguments);
-    
+
     layer.SetPowerAction(CoreLayer::PA_Sleep);
     layer.SetSleepMode(CoreLayer::SM_None);
     CHECK(layer.ExecutePowerAction() == CoreLayer::ER_BadArguments);
+}
+
+TEST_CASE("CoreLayer Lock and Logoff can be set") {
+    CoreLayer layer;
+
+    CHECK(layer.SetPowerAction(CoreLayer::PA_Lock) == CoreLayer::ER_Success);
+    CHECK(layer.GetPowerAction() == CoreLayer::PA_Lock);
+
+    CHECK(layer.SetPowerAction(CoreLayer::PA_Logoff) == CoreLayer::ER_Success);
+    CHECK(layer.GetPowerAction() == CoreLayer::PA_Logoff);
+}
+
+TEST_CASE("CoreLayer PA_Lock and PA_Logoff bypass privilege check") {
+    CoreLayer layer;
+
+    // 锁屏不需要特权检查，直接调用 CallFunction
+    layer.SetPowerAction(CoreLayer::PA_Lock);
+    // 注意：实际执行锁屏会影响测试环境，所以只测试设置是否成功
+    CHECK(layer.GetPowerAction() == CoreLayer::PA_Lock);
+
+    // 注销设置测试
+    layer.SetPowerAction(CoreLayer::PA_Logoff);
+    layer.SetIsForce(false);
+    CHECK(layer.GetPowerAction() == CoreLayer::PA_Logoff);
+    CHECK(layer.GetIsForce() == false);
 }
