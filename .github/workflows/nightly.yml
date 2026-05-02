@@ -28,8 +28,14 @@ jobs:
       - name: Build Debug|x64
         run: msbuild QuickPowerAction.sln /p:Configuration=Debug /p:Platform="x64" /m /verbosity:minimal
 
+      - name: Build Debug|x86
+        run: msbuild QuickPowerAction.sln /p:Configuration=Debug /p:Platform="x86" /m /verbosity:minimal
+
       - name: Build Release|x64
         run: msbuild QuickPowerAction.sln /p:Configuration=Release /p:Platform="x64" /m /verbosity:minimal
+
+      - name: Build Release|x86
+        run: msbuild QuickPowerAction.sln /p:Configuration=Release /p:Platform="x86" /m /verbosity:minimal
 
       - name: Extract Version from .rc file
         id: extract-version
@@ -76,11 +82,11 @@ jobs:
             else { $other += $commit }
           }
           
-          $changelog = "## 📋 更新内容`n`n"
-          if ($feat) { $changelog += "### ✨ 新功能`n" + ($feat -join "`n") + "`n`n" }
-          if ($fix) { $changelog += "### 🐛 修复`n" + ($fix -join "`n") + "`n`n" }
-          if ($chore) { $changelog += "### 🔧 维护`n" + ($chore -join "`n") + "`n`n" }
-          if ($other) { $changelog += "### 📝 其他`n" + ($other -join "`n") + "`n`n" }
+          $changelog = "## 📋 Changelog`n`n"
+          if ($feat) { $changelog += "### ✨ Features`n" + ($feat -join "`n") + "`n`n" }
+          if ($fix) { $changelog += "### 🐛 Fix`n" + ($fix -join "`n") + "`n`n" }
+          if ($chore) { $changelog += "### 🔧 Toolchains`n" + ($chore -join "`n") + "`n`n" }
+          if ($other) { $changelog += "### 📝 Others`n" + ($other -join "`n") + "`n`n" }
           
           $changelogPath = "changelog.md"
           $changelog | Out-File -FilePath $changelogPath -Encoding utf8
