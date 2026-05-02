@@ -22,6 +22,9 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+x64/
+x86/
+QuickPowerAction/
 
 [Dd]ebug/x64/
 [Dd]ebugPublic/x64/
@@ -426,3 +429,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Agents
+.qwen/
