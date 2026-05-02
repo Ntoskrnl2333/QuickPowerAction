@@ -309,8 +309,9 @@
     <ClCompile Include="QuickPowerAction.cpp" />
     <ClCompile Include="QuickPowerActionDlg.cpp" />
     <!-- 测试源文件 -->
-    <ClCompile Include="CoreLayer_test.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Test|x64'">NotUsing</PrecompiledHeader>
+    <ClCompile Include="CoreLayer_test.cpp"
+           Condition="'$(Configuration)'=='Test'">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;NOMINMAX;UNIT_TEST_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>
