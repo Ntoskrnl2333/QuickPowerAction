@@ -102,5 +102,7 @@ jobs:
           prerelease: true
           files: |
             x64/Debug/QuickPowerAction/QuickPowerAction.exe
+            x86/Debug/QuickPowerAction/QuickPowerAction.exe
             x64/Release/QuickPowerAction/QuickPowerAction.exe
+            x86/Release/QuickPowerAction/QuickPowerAction.exe
           generate_release_notes: false
