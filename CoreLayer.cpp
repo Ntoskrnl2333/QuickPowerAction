@@ -47,7 +47,7 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 	TOKEN_PRIVILEGES NewState;
 	LUID luidPrivilegeLUID;
 
-	// 1. ´ò¿ª token£¨Ôö¼Ó TOKEN_QUERY£©
+	// 1. æ‰“å¼€ tokenï¼ˆå¢åŠ  TOKEN_QUERYï¼‰
 	if (!OpenProcessToken(GetCurrentProcess(),
 		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
 		&hToken))
@@ -55,7 +55,7 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 		return GetLastError();
 	}
 
-	// 2. ²éÕÒ LUID£¨±ØĞë¼ì²é£©
+	// 2. æŸ¥æ‰¾ LUIDï¼ˆå¿…é¡»æ£€æŸ¥ï¼‰
 	if (!LookupPrivilegeValueA(NULL, lpPrivilegeName, &luidPrivilegeLUID))
 	{
 		DWORD err = GetLastError();
@@ -63,12 +63,12 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 		return err;
 	}
 
-	// 3. ¹¹Ôì½á¹¹£¨Ö§³Ö enable / disable µ¥¸öÈ¨ÏŞ£©
+	// 3. æ„é€ ç»“æ„ï¼ˆæ”¯æŒ enable / disable å•ä¸ªæƒé™ï¼‰
 	NewState.PrivilegeCount = 1;
 	NewState.Privileges[0].Luid = luidPrivilegeLUID;
 	NewState.Privileges[0].Attributes = fEnable ? SE_PRIVILEGE_ENABLED : 0;
 
-	// 4. µ÷ÕûÈ¨ÏŞ
+	// 4. è°ƒæ•´æƒé™
 	if (!AdjustTokenPrivileges(hToken, FALSE, &NewState, 0, NULL, NULL))
 	{
 		DWORD err = GetLastError();
@@ -76,15 +76,15 @@ DWORD WINAPI CoreLayer::SysAdjustPrivilege(LPCSTR lpPrivilegeName, BOOL fEnable)
 		return err;
 	}
 
-	// 5. ¹Ø¼ü£º¼ì²éÊÇ·ñÕæµÄÉúĞ§
+	// 5. å…³é”®ï¼šæ£€æŸ¥æ˜¯å¦çœŸçš„ç”Ÿæ•ˆ
 	DWORD err = GetLastError();
 
-	// 6. ÊÍ·Å¾ä±ú£¨±ÜÃâĞ¹Â©£©
+	// 6. é‡Šæ”¾å¥æŸ„ï¼ˆé¿å…æ³„æ¼ï¼‰
 	CloseHandle(hToken);
 
 	if (err == ERROR_NOT_ALL_ASSIGNED)
 	{
-		// µ±Ç° token Ã»ÓĞ¸ÃÈ¨ÏŞ
+		// å½“å‰ token æ²¡æœ‰è¯¥æƒé™
 		return err;
 	}
 
@@ -233,25 +233,25 @@ std::vector<CoreLayer::PowerAction> CoreLayer::GetSupportedPowerAction() {
 	std::vector<PowerAction> supported;
 	SYSTEM_POWER_CAPABILITIES caps = {};
 
-	// Ê¼ÖÕÖ§³ÖËøÆÁºÍ×¢Ïú£¨²»ĞèÒªÌØÊâÓ²¼şÖ§³Ö£©
+	// å§‹ç»ˆæ”¯æŒé”å±å’Œæ³¨é”€ï¼ˆä¸éœ€è¦ç‰¹æ®Šç¡¬ä»¶æ”¯æŒï¼‰
 	supported.push_back(PA_Lock);
 	supported.push_back(PA_Logoff);
 
-	// »ñÈ¡ÏµÍ³µçÔ´ÄÜÁ¦
+	// è·å–ç³»ç»Ÿç”µæºèƒ½åŠ›
 	if (!GetPwrCapabilities(&caps)) {
 		return supported;
 	}
 
-	// ¹Ø»ú/ÖØÆô£ºĞèÒª SE_SHUTDOWN_PRIVILEGE È¨ÏŞ
+	// å…³æœº/é‡å¯ï¼šéœ€è¦ SE_SHUTDOWN_PRIVILEGE æƒé™
 	supported.push_back(PA_Shutdown);
 	supported.push_back(PA_Reboot);
 
-	// Ë¯Ãß£ºĞèÒªÖÁÉÙÒ»ÖÖË¯Ãß×´Ì¬¿ÉÓÃ
+	// ç¡çœ ï¼šéœ€è¦è‡³å°‘ä¸€ç§ç¡çœ çŠ¶æ€å¯ç”¨
 	if (caps.SystemS1 || caps.SystemS2 || caps.SystemS3) {
 		supported.push_back(PA_Sleep);
 	}
 
-	// ĞİÃß£ºĞèÒªĞİÃßÎÄ¼ş´æÔÚ
+	// ä¼‘çœ ï¼šéœ€è¦ä¼‘çœ æ–‡ä»¶å­˜åœ¨
 	if (caps.HiberFilePresent) {
 		supported.push_back(PA_Hibernate);
 	}
@@ -267,7 +267,7 @@ std::vector<CoreLayer::SleepMode> CoreLayer::GetSupportedSleepMode() {
 		return supported;
 	}
 
-	// °´Ë¯ÃßÉî¶ÈË³ĞòÌí¼ÓÖ§³ÖµÄË¯ÃßÄ£Ê½
+	// æŒ‰ç¡çœ æ·±åº¦é¡ºåºæ·»åŠ æ”¯æŒçš„ç¡çœ æ¨¡å¼
 	if (caps.SystemS1) {
 		supported.push_back(SM_S1);
 	}

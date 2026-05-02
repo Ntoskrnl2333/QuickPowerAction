@@ -50,6 +50,9 @@
     <ClCompile Include="CoreLayer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CoreLayer_test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="QuickPowerAction.rc">
