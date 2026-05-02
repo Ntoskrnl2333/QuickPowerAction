@@ -45,7 +45,14 @@ jobs:
           $content = Get-Content $rcFile -Raw
           $match = [regex]::Match($content, 'VALUE\s+"ProductVersion",\s+"([^"]+)"')
           if ($match.Success) {
-            $version = $match.Groups[1].Value
+            $rawVersion = $match.Groups[1].Value
+            # Extract just the version number (e.g., "2.0.0.1" from "Nightly 2.0.0.1")
+            $versionMatch = [regex]::Match($rawVersion, '(\d+\.\d+\.\d+\.\d+)')
+            if ($versionMatch.Success) {
+              $version = $versionMatch.Groups[1].Value
+            } else {
+              $version = $rawVersion
+            }
             $shortSha = "${{ github.sha }}".Substring(0, 7)
             $tag = "nightly-${version}-${shortSha}"
             Write-Host "Extracted version: $version"
@@ -101,8 +108,8 @@ jobs:
           body_path: changelog.md
           prerelease: true
           files: |
-            x64/Debug/QuickPowerAction/QuickPowerAction.exe
-            x86/Debug/QuickPowerAction/QuickPowerAction.exe
-            x64/Release/QuickPowerAction/QuickPowerAction.exe
-            x86/Release/QuickPowerAction/QuickPowerAction.exe
+            x64/Debug/QuickPowerAction.exe
+            x86/Debug/QuickPowerAction.exe
+            x64/Release/QuickPowerAction.exe
+            x86/Release/QuickPowerAction.exe
           generate_release_notes: false
