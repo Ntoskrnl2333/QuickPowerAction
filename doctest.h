@@ -152,6 +152,9 @@
 #define DOCTEST_GCC_SUPPRESS_WARNING_WITH_PUSH(w)
 #endif // DOCTEST_GCC
 
+#undef max
+#undef min
+
 #if DOCTEST_MSVC
 #define DOCTEST_MSVC_SUPPRESS_WARNING_PUSH __pragma(warning(push))
 #define DOCTEST_MSVC_SUPPRESS_WARNING(w) __pragma(warning(disable : w))
