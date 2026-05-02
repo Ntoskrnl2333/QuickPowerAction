@@ -24,6 +24,7 @@ mono_crash.*
 [Rr]eleases/
 x64/
 x86/
+QuickPowerAction/
 
 [Dd]ebug/x64/
 [Dd]ebugPublic/x64/
