@@ -1,4 +1,4 @@
-name: Check MFC Build
+name: Unit Tests
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        platform: [Win32, x64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,5 +22,11 @@ jobs:
       - name: Restore NuGet Packages
         run: nuget restore QuickPowerAction.sln
 
-      - name: Compile Only (No Link)
-        run: msbuild QuickPowerAction.sln /t:ClCompile /p:Configuration=Release /p:Platform="x64" /m /verbosity:minimal
+      - name: Build Test Configuration
+        run: msbuild QuickPowerAction.sln /p:Configuration=Test /p:Platform="${{ matrix.platform }}" /m /verbosity:minimal
+
+      - name: Run Unit Tests
+        run: |
+          $exePath = "Build\${{ matrix.platform }}\Test\QuickPowerAction.exe"
+          Write-Host "Running tests from: $exePath"
+          & $exePath
