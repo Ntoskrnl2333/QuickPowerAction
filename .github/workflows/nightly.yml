@@ -1,0 +1,108 @@
+name: Nightly Build & Release
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      tag: ${{ steps.extract-version.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet Packages
+        run: nuget restore QuickPowerAction.sln
+
+      - name: Build Debug|x64
+        run: msbuild QuickPowerAction.sln /p:Configuration=Debug /p:Platform="x64" /m /verbosity:minimal
+
+      - name: Build Debug|x86
+        run: msbuild QuickPowerAction.sln /p:Configuration=Debug /p:Platform="x86" /m /verbosity:minimal
+
+      - name: Build Release|x64
+        run: msbuild QuickPowerAction.sln /p:Configuration=Release /p:Platform="x64" /m /verbosity:minimal
+
+      - name: Build Release|x86
+        run: msbuild QuickPowerAction.sln /p:Configuration=Release /p:Platform="x86" /m /verbosity:minimal
+
+      - name: Extract Version from .rc file
+        id: extract-version
+        shell: pwsh
+        run: |
+          $rcFile = "QuickPowerAction.rc"
+          $content = Get-Content $rcFile -Raw
+          $match = [regex]::Match($content, 'VALUE\s+"ProductVersion",\s+"([^"]+)"')
+          if ($match.Success) {
+            $version = $match.Groups[1].Value
+            $shortSha = "${{ github.sha }}".Substring(0, 7)
+            $tag = "nightly-${version}-${shortSha}"
+            Write-Host "Extracted version: $version"
+            Write-Host "Generated tag: $tag"
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "tag=$tag" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Error "Failed to extract ProductVersion from $rcFile"
+            exit 1
+          }
+
+      - name: Generate Changelog
+        id: changelog
+        shell: pwsh
+        run: |
+          $lastTag = git describe --tags --abbrev=0 2>$null
+          if ($lastTag) {
+            Write-Host "Last tag: $lastTag"
+            $commits = git log "$lastTag..HEAD" --pretty=format:"- %s" --no-merges
+          } else {
+            Write-Host "No previous tags found, using all commits"
+            $commits = git log --pretty=format:"- %s" --no-merges
+          }
+          
+          $feat = @()
+          $fix = @()
+          $chore = @()
+          $other = @()
+          
+          foreach ($commit in $commits) {
+            if ($commit -match "^\- feat") { $feat += $commit }
+            elseif ($commit -match "^\- fix") { $fix += $commit }
+            elseif ($commit -match "^\- chore") { $chore += $commit }
+            else { $other += $commit }
+          }
+          
+          $changelog = "## 📋 Changelog`n`n"
+          if ($feat) { $changelog += "### ✨ Features`n" + ($feat -join "`n") + "`n`n" }
+          if ($fix) { $changelog += "### 🐛 Fix`n" + ($fix -join "`n") + "`n`n" }
+          if ($chore) { $changelog += "### 🔧 Toolchains`n" + ($chore -join "`n") + "`n`n" }
+          if ($other) { $changelog += "### 📝 Others`n" + ($other -join "`n") + "`n`n" }
+          
+          $changelogPath = "changelog.md"
+          $changelog | Out-File -FilePath $changelogPath -Encoding utf8
+          Write-Host "Generated changelog:"
+          Get-Content $changelogPath
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.extract-version.outputs.tag }}
+          name: "Nightly Build ${{ steps.extract-version.outputs.version }} - ${{ github.event.head_commit.timestamp }}T"
+          body_path: changelog.md
+          prerelease: true
+          files: |
+            x64/Debug/QuickPowerAction/QuickPowerAction.exe
+            x86/Debug/QuickPowerAction/QuickPowerAction.exe
+            x64/Release/QuickPowerAction/QuickPowerAction.exe
+            x86/Release/QuickPowerAction/QuickPowerAction.exe
+          generate_release_notes: false
