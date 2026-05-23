@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install MFC
+        run: choco install visualstudio2022-workload-nativedesktop --package-parameters "--includeRecommended --includeOptional" -y
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
