@@ -1,5 +1,4 @@
-﻿
-// QuickPowerActionDlg.cpp: 实现文件
+﻿// QuickPowerActionDlg.cpp: 实现文件
 //
 
 #include "pch.h"
@@ -13,7 +12,7 @@
 #endif
 
 
-// 用于应用程序“关于”菜单项的 CAboutDlg 对话框
+// 用于应用程序"关于"菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialog
 {
@@ -52,6 +51,9 @@ END_MESSAGE_MAP()
 
 CQuickPowerActionDlg::CQuickPowerActionDlg(CWnd* pParent /*=nullptr*/)
 	: CDialog(IDD_QUICKPOWERACTION_DIALOG, pParent)
+	, m_nPowerAction(0)
+	, m_nSleepMode(0)
+	, m_bForce(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -59,12 +61,23 @@ CQuickPowerActionDlg::CQuickPowerActionDlg(CWnd* pParent /*=nullptr*/)
 void CQuickPowerActionDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Radio(pDX, IDC_RADIO_SHUTDOWN, m_nPowerAction);
+	DDX_CBIndex(pDX, IDC_COMBO_SLEEP_MODE, m_nSleepMode);
+	DDX_Check(pDX, IDC_CHECK_FORCE, m_bForce);
 }
 
 BEGIN_MESSAGE_MAP(CQuickPowerActionDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BTN_EXECUTE, &CQuickPowerActionDlg::OnBnClickedExecute)
+	ON_BN_CLICKED(IDC_RADIO_SHUTDOWN, &CQuickPowerActionDlg::OnBnClickedRadioShutdown)
+	ON_BN_CLICKED(IDC_RADIO_REBOOT, &CQuickPowerActionDlg::OnBnClickedRadioReboot)
+	ON_BN_CLICKED(IDC_RADIO_LOCK, &CQuickPowerActionDlg::OnBnClickedRadioLock)
+	ON_BN_CLICKED(IDC_RADIO_LOGOFF, &CQuickPowerActionDlg::OnBnClickedRadioLogoff)
+	ON_BN_CLICKED(IDC_RADIO_SLEEP, &CQuickPowerActionDlg::OnBnClickedRadioSleep)
+	ON_BN_CLICKED(IDC_RADIO_HIBERNATE, &CQuickPowerActionDlg::OnBnClickedRadioHibernate)
+	ON_BN_CLICKED(IDC_BTN_HELP, &CQuickPowerActionDlg::OnBnClickedBtnHelp)
 END_MESSAGE_MAP()
 
 
@@ -74,7 +87,7 @@ BOOL CQuickPowerActionDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// 将“关于...”菜单项添加到系统菜单中。
+	// 将"关于..."菜单项添加到系统菜单中。
 
 	// IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
@@ -99,7 +112,14 @@ BOOL CQuickPowerActionDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-	// TODO: 在此添加额外的初始化代码
+	// 初始化睡眠模式下拉框
+	UpdateSleepModeCombo();
+
+	// 根据系统支持的电源操作启用/禁用单选按钮
+	EnableControlsForAction();
+
+	// 默认选中关机（使用手动设置，确保状态正确）
+	SetRadioState(0);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -153,3 +173,245 @@ HCURSOR CQuickPowerActionDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CQuickPowerActionDlg::UpdateSleepModeCombo()
+{
+	CComboBox* pCombo = (CComboBox*)GetDlgItem(IDC_COMBO_SLEEP_MODE);
+	if (pCombo == nullptr)
+		return;
+
+	pCombo->ResetContent();
+
+	// 获取系统支持的睡眠模式
+	std::vector<CoreLayer::SleepMode> supportedModes = m_coreLayer.GetSupportedSleepMode();
+
+	// 如果没有获取到支持的模式，添加默认选项
+	if (supportedModes.empty())
+	{
+		pCombo->AddString(_T("S3（深度睡眠）"));
+		pCombo->SetCurSel(0);
+		m_nSleepMode = CoreLayer::SM_S3;
+		return;
+	}
+
+	for (CoreLayer::SleepMode mode : supportedModes)
+	{
+		CString strMode;
+		switch (mode)
+		{
+		case CoreLayer::SM_S1:
+			strMode = _T("S1（浅度睡眠）");
+			break;
+		case CoreLayer::SM_S2:
+			strMode = _T("S2（中度睡眠）");
+			break;
+		case CoreLayer::SM_S3:
+			strMode = _T("S3（深度睡眠）");
+			break;
+		default:
+			continue;
+		}
+		pCombo->AddString(strMode);
+	}
+
+	// 默认选择第一项
+	if (pCombo->GetCount() > 0)
+	{
+		pCombo->SetCurSel(0);
+		m_nSleepMode = supportedModes[0];
+	}
+}
+
+void CQuickPowerActionDlg::EnableControlsForAction()
+{
+	// 映射电源操作到单选按钮 ID
+	struct ActionToRadio
+	{
+		CoreLayer::PowerAction action;
+		int radioId;
+	};
+
+	ActionToRadio mapping[] = {
+		{ CoreLayer::PA_Shutdown, IDC_RADIO_SHUTDOWN },
+		{ CoreLayer::PA_Reboot, IDC_RADIO_REBOOT },
+		{ CoreLayer::PA_Lock, IDC_RADIO_LOCK },
+		{ CoreLayer::PA_Logoff, IDC_RADIO_LOGOFF },
+		{ CoreLayer::PA_Sleep, IDC_RADIO_SLEEP },
+		{ CoreLayer::PA_Hibernate, IDC_RADIO_HIBERNATE }
+	};
+
+	// 获取系统支持的电源操作
+	std::vector<CoreLayer::PowerAction> supportedActions = m_coreLayer.GetSupportedPowerAction();
+
+	// 启用/禁用单选按钮
+	for (const auto& item : mapping)
+	{
+		CWnd* pWnd = GetDlgItem(item.radioId);
+		if (pWnd != nullptr)
+		{
+			bool bEnabled = false;
+			for (CoreLayer::PowerAction action : supportedActions)
+			{
+				if (item.action == action)
+				{
+					bEnabled = true;
+					break;
+				}
+			}
+		}
+	}
+}
+
+void CQuickPowerActionDlg::OnBnClickedRadioShutdown()
+{
+	SetRadioState(0);
+}
+
+void CQuickPowerActionDlg::OnBnClickedRadioReboot()
+{
+	SetRadioState(1);
+}
+
+void CQuickPowerActionDlg::OnBnClickedRadioLock()
+{
+	SetRadioState(2);
+}
+
+void CQuickPowerActionDlg::OnBnClickedRadioLogoff()
+{
+	SetRadioState(3);
+}
+
+void CQuickPowerActionDlg::OnBnClickedRadioSleep()
+{
+	SetRadioState(4);
+}
+
+void CQuickPowerActionDlg::OnBnClickedRadioHibernate()
+{
+	SetRadioState(5);
+}
+
+void CQuickPowerActionDlg::SetRadioState(int nIndex)
+{
+	// 手动设置单选按钮的选中状态
+	((CButton*)GetDlgItem(IDC_RADIO_SHUTDOWN))->SetCheck(nIndex == 0);
+	((CButton*)GetDlgItem(IDC_RADIO_REBOOT))->SetCheck(nIndex == 1);
+	((CButton*)GetDlgItem(IDC_RADIO_LOCK))->SetCheck(nIndex == 2);
+	((CButton*)GetDlgItem(IDC_RADIO_LOGOFF))->SetCheck(nIndex == 3);
+	((CButton*)GetDlgItem(IDC_RADIO_SLEEP))->SetCheck(nIndex == 4);
+	((CButton*)GetDlgItem(IDC_RADIO_HIBERNATE))->SetCheck(nIndex == 5);
+
+	// 更新成员变量
+	m_nPowerAction = nIndex;
+
+	// 根据当前选中的电源操作启用/禁用睡眠模式
+	CComboBox* pCombo = (CComboBox*)GetDlgItem(IDC_COMBO_SLEEP_MODE);
+	CWnd* pStatic = GetDlgItem(IDC_STATIC_SLEEP_MODE);
+
+	bool isSleep = (nIndex == 4);  // 睡眠选项的索引是4
+
+	if (pCombo != nullptr)
+	{
+		pCombo->EnableWindow(isSleep);
+	}
+	if (pStatic != nullptr)
+	{
+		pStatic->EnableWindow(isSleep);
+	}
+}
+
+void CQuickPowerActionDlg::OnBnClickedExecute()
+{
+	UpdateData(TRUE);
+
+	// 将单选按钮索引映射到电源操作
+	CoreLayer::PowerAction action;
+	switch (m_nPowerAction)
+	{
+	case 0: action = CoreLayer::PA_Shutdown; break;
+	case 1: action = CoreLayer::PA_Reboot; break;
+	case 2: action = CoreLayer::PA_Lock; break;
+	case 3: action = CoreLayer::PA_Logoff; break;
+	case 4: action = CoreLayer::PA_Sleep; break;
+	case 5: action = CoreLayer::PA_Hibernate; break;
+	default:
+		AfxMessageBox(_T("请选择一个电源操作"), MB_ICONWARNING);
+		return;
+	}
+
+	// 设置电源操作
+	CoreLayer::ExecResult result = m_coreLayer.SetPowerAction(action);
+	if (result != CoreLayer::ER_Success)
+	{
+		AfxMessageBox(_T("设置电源操作失败"), MB_ICONERROR);
+		return;
+	}
+
+	// 如果是睡眠，设置睡眠模式
+	if (action == CoreLayer::PA_Sleep)
+	{
+		// 获取选中的睡眠模式
+		std::vector<CoreLayer::SleepMode> supportedModes = m_coreLayer.GetSupportedSleepMode();
+		if (m_nSleepMode >= 0 && m_nSleepMode < (int)supportedModes.size())
+		{
+			result = m_coreLayer.SetSleepMode(supportedModes[m_nSleepMode]);
+			if (result != CoreLayer::ER_Success)
+			{
+				AfxMessageBox(_T("设置睡眠模式失败"), MB_ICONERROR);
+				return;
+			}
+		}
+		else
+		{
+			AfxMessageBox(_T("请选择睡眠模式"), MB_ICONWARNING);
+			return;
+		}
+	}
+
+	// 设置强制执行
+	m_coreLayer.SetIsForce(m_bForce != FALSE);
+
+	// 执行电源操作
+	result = m_coreLayer.ExecutePowerAction();
+
+	// 根据结果显示错误信息（成功时通常不会返回）
+	CString strError;
+	switch (result)
+	{
+	case CoreLayer::ER_Success:
+		// 执行成功，无需显示信息
+		break;
+	case CoreLayer::ER_BadArguments:
+		strError = _T("参数错误");
+		break;
+	case CoreLayer::ER_PowerActionNotSupported:
+		strError = _T("此电源操作不受支持");
+		break;
+	case CoreLayer::ER_NoPrivilege:
+		strError = _T("没有足够的权限执行此操作\n请以管理员身份运行程序");
+		break;
+	case CoreLayer::ER_CannotLoadDLL:
+		strError = _T("无法加载 NtDll.dll");
+		break;
+	case CoreLayer::ER_CannotReachFunction:
+		strError = _T("无法找到所需的系统函数");
+		break;
+	case CoreLayer::ER_OutOfMemory:
+		strError = _T("内存不足");
+		break;
+	default:
+		strError = _T("未知错误");
+		break;
+	}
+
+	if (!strError.IsEmpty())
+	{
+		AfxMessageBox(strError, MB_ICONERROR);
+	}
+}
+
+void CQuickPowerActionDlg::OnBnClickedBtnHelp()
+{
+	CAboutDlg dlgAbout;
+	dlgAbout.DoModal();
+}

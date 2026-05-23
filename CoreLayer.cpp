@@ -192,6 +192,28 @@ CoreLayer::ExecResult CoreLayer::CallFunction() {
 		NtInitiatePowerAction(PowerActionHibernate, PowerSystemHibernate, 0, TRUE);
 		break;
 	}
+	case PA_Lock: {
+		// 锁屏：使用 Windows API
+		if (!LockWorkStation()) {
+			return ER_UnknownError;
+		}
+		break;
+	}
+	case PA_Logoff: {
+		// 注销：使用 ExitWindowsEx
+		DWORD flags = EWX_LOGOFF;
+		if (m_curisforce) {
+			flags |= EWX_FORCE;
+		}
+		if (!ExitWindowsEx(flags, 0)) {
+			DWORD err = GetLastError();
+			if (err == ERROR_NOT_ALL_ASSIGNED) {
+				return ER_NoPrivilege;
+			}
+			return ER_UnknownError;
+		}
+		break;
+	}
 	default:
 		return ER_PowerActionNotSupported;
 	}
@@ -206,6 +228,11 @@ CoreLayer::ExecResult CoreLayer::ExecutePowerAction() {
 
 	if (m_curaction == PA_Sleep && m_cursleep == SM_None) {
 		return ER_BadArguments;
+	}
+
+	// 锁屏和注销不需要特权，直接执行
+	if (m_curaction == PA_Lock || m_curaction == PA_Logoff) {
+		return CallFunction();
 	}
 
 	ExecResult ret;
