@@ -19,31 +19,70 @@ jobs:
       - name: Install MFC
         shell: powershell
         run: |
+          $ErrorActionPreference = 'Stop'
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $vsPath = & $vswhere -latest -products * -property installationPath
           Write-Host "VS installation path: $vsPath"
 
-          # vs_installer.exe (VS 2019+) / setup.exe (fallback)
-          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-          if (-not (Test-Path $installer)) {
-            $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
-          }
-          Write-Host "Using installer: $installer"
-
-          & $installer modify `
-            --installPath "$vsPath" `
-            --add Microsoft.VisualStudio.Component.VC.ATLMFC `
-            --quiet --wait --norestart
-
-          if ($LASTEXITCODE -ne 0) {
-            throw "MFC component installation failed with exit code $LASTEXITCODE"
-          }
-
-          $mfcPath = Join-Path $vsPath "VC\Atlmfc"
-          if (Test-Path $mfcPath) {
-            Write-Host "MFC verified at: $mfcPath"
+          # Search for existing MFC lib files first
+          Write-Host "Searching for existing MFC libraries..."
+          $mfcLibs = @(Get-ChildItem "$vsPath\VC\Tools\MSVC\*\atlmfc\lib\*\mfc*.lib" -ErrorAction SilentlyContinue)
+          if ($mfcLibs.Count -gt 0) {
+            Write-Host "MFC libraries already installed: $($mfcLibs.Count) files found"
+            $mfcLibs | Select-Object -First 5 | ForEach-Object { Write-Host "  $($_.FullName)" }
           } else {
-            Write-Warning "MFC path not found, but installer reported success"
+            Write-Host "MFC libraries not found. Attempting installation..."
+
+            # Try both installers; setup.exe is more reliable on modern VS
+            $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+            if (-not (Test-Path $installer)) {
+              $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+            }
+            Write-Host "Using installer: $installer"
+
+            # --passive (not --quiet) ensures the operation actually runs;
+            # --force forces re-evaluation even if component is cached
+            & $installer modify `
+              --installPath "$vsPath" `
+              --add Microsoft.VisualStudio.Component.VC.ATLMFC `
+              --includeRecommended `
+              --passive --wait --norestart --force
+
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "vs_installer (setup.exe) failed (code $LASTEXITCODE), retrying with second installer..."
+
+              # Fallback: try the other installer
+              $fallback = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+              if ((Test-Path $fallback) -and $fallback -ne $installer) {
+                & $fallback modify `
+                  --installPath "$vsPath" `
+                  --add Microsoft.VisualStudio.Component.VC.ATLMFC `
+                  --includeRecommended `
+                  --passive --wait --norestart --force
+
+                if ($LASTEXITCODE -ne 0) {
+                  throw "MFC installation failed with exit code $LASTEXITCODE (both installers tried)"
+                }
+              } else {
+                throw "MFC installation failed with exit code $LASTEXITCODE"
+              }
+            }
+
+            # Verify installation by searching for MFC libs
+            Start-Sleep -Seconds 5
+            $mfcLibs = @(Get-ChildItem "$vsPath\VC\Tools\MSVC\*\atlmfc\lib\*\mfc*.lib" -ErrorAction SilentlyContinue)
+            if ($mfcLibs.Count -eq 0) {
+              # Also check the old-school path
+              $mfcLibs = @(Get-ChildItem "$vsPath\VC\atlmfc\lib\*\mfc*.lib" -ErrorAction SilentlyContinue)
+            }
+            if ($mfcLibs.Count -gt 0) {
+              Write-Host "MFC installation verified: $($mfcLibs.Count) library files found"
+              $mfcLibs | Select-Object -First 5 | ForEach-Object { Write-Host "  $($_.FullName)" }
+            } else {
+              Write-Warning "MFC installer reported success, but library files not found"
+              # Fallback: check if MSVC toolset has a different layout
+              Get-ChildItem "$vsPath\VC\Tools\MSVC" -ErrorAction SilentlyContinue | Select-Object Name
+            }
           }
 
       - name: Setup MSBuild
