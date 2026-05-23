@@ -1,5 +1,7 @@
-﻿// Microsoft Visual C++ generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
+#pragma code_page(65001)
+
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -52,23 +54,13 @@ BEGIN
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
     "LANGUAGE 4, 2\r\n"
-    "#include ""res\\QuickPowerAction.rc2""  // 非 Microsoft Visual C++ 编辑的资源\r\n"
-    "#include ""l.CHS\\afxres.rc""      // 标准组件\r\n"
+    "#include ""res\\QuickPowerAction.rc2""  // 闈?Microsoft Visual C++ 缂栬緫鐨勮祫婧?\n"
+    "#include ""l.CHS\\afxres.rc""      // 鏍囧噯缁勪欢\r\n"
     "#endif\r\n"
     "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\QuickPowerAction.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -81,29 +73,30 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "关于 QuickPowerAction"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
-    LTEXT           "QuickPowerAction，版本 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
-    LTEXT           "版权所有 (C) 2026",IDC_STATIC,42,26,114,8
+    CONTROL         IDB_MAINFRAME,IDC_STATIC,"Static",SS_BITMAP,14,14,79,71
+    LTEXT           "QuickPowerAction，版本 2.0.0.2",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "以 Apache-2.0 开源许可证开源。",IDC_STATIC,42,26,114,8
     DEFPUSHBUTTON   "确定",IDOK,113,41,50,14,WS_GROUP
 END
 
-IDD_QUICKPOWERACTION_DIALOG DIALOGEX 0, 0, 260, 160
+IDD_QUICKPOWERACTION_DIALOG DIALOGEX 0, 0, 280, 200
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-FONT 9, "MS Shell Dlg", 0, 0, 0x1
+FONT 9, "Microsoft YaHei UI", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "电源操作",IDC_STATIC_POWER_ACTION,7,7,120,126
-    RADIOBUTTON     "关机",IDC_RADIO_SHUTDOWN,14,21,106,10
-    RADIOBUTTON     "重启",IDC_RADIO_REBOOT,14,35,106,10
-    RADIOBUTTON     "锁屏",IDC_RADIO_LOCK,14,49,106,10
-    RADIOBUTTON     "注销",IDC_RADIO_LOGOFF,14,63,106,10
-    RADIOBUTTON     "睡眠",IDC_RADIO_SLEEP,14,77,106,10
-    RADIOBUTTON     "休眠",IDC_RADIO_HIBERNATE,14,91,106,10
-    LTEXT           "睡眠模式:",IDC_STATIC_SLEEP_MODE,14,108,106,8
-    COMBOBOX        IDC_COMBO_SLEEP_MODE,14,119,106,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "强制执行",IDC_CHECK_FORCE,133,7,50,14,BS_AUTOCHECKBOX | WS_TABSTOP
-    DEFPUSHBUTTON   "执行",IDC_BTN_EXECUTE,133,28,120,28
-    PUSHBUTTON      "取消",IDCANCEL,133,63,120,28
+    GROUPBOX        "电源操作",IDC_STATIC_POWER_ACTION,7,7,265,90
+    RADIOBUTTON     "关机",IDC_RADIO_SHUTDOWN,14,22,100,10,WS_GROUP
+    RADIOBUTTON     "重启",IDC_RADIO_REBOOT,14,36,100,10
+    RADIOBUTTON     "锁屏",IDC_RADIO_LOCK,14,50,100,10
+    RADIOBUTTON     "注销",IDC_RADIO_LOGOFF,120,22,100,10
+    RADIOBUTTON     "睡眠",IDC_RADIO_SLEEP,120,36,100,10
+    RADIOBUTTON     "休眠",IDC_RADIO_HIBERNATE,120,50,100,10
+    LTEXT           "睡眠模式:",IDC_STATIC_SLEEP_MODE,14,68,60,8
+    COMBOBOX        IDC_COMBO_SLEEP_MODE,78,65,100,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "强制执行",IDC_CHECK_FORCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,68,60,14
+    DEFPUSHBUTTON   "执行",IDC_BTN_EXECUTE,7,110,130,28
+    PUSHBUTTON      "取消",IDCANCEL,143,110,130,28
+    PUSHBUTTON      "关于",IDC_BTN_HELP,7,142,266,28
 END
 
 
@@ -113,8 +106,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,1
- PRODUCTVERSION 2,0,0,1
+ FILEVERSION 2,0,0,2
+ PRODUCTVERSION 2,0,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -131,12 +124,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ntoskrnl2333"
             VALUE "FileDescription", "QuickPowerAction"
-            VALUE "FileVersion", "Nightly 2.0.0.1"
+            VALUE "FileVersion", "Nightly 2.0.0.2"
             VALUE "InternalName", "QuickPowerAction.exe"
             VALUE "LegalCopyright", "Ntoskrnl2333  Published under the Apache-2.0 license"
             VALUE "OriginalFilename", "QuickPowerAction.exe"
             VALUE "ProductName", "Ntoskrnl2333"
-            VALUE "ProductVersion", "Nightly 2.0.0.1"
+            VALUE "ProductVersion", "Nightly 2.0.0.2"
         END
     END
     BLOCK "VarFileInfo"
@@ -156,7 +149,7 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
-        LEFTMARGIN, 7
+        LEFTMARGIN, 6
         RIGHTMARGIN, 163
         TOPMARGIN, 7
         BOTTOMMARGIN, 55
@@ -165,12 +158,45 @@ BEGIN
     IDD_QUICKPOWERACTION_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 253
+        RIGHTMARGIN, 273
         TOPMARGIN, 7
-        BOTTOMMARGIN, 153
+        BOTTOMMARGIN, 193
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    0, 0, 10, 100,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "C:\\Users\\35150\\source\\repos\\QuickPowerAction\\res\\QuickPowerAction.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_MAINFRAME           BITMAP                  "C:\\Users\\35150\\source\\repos\\QuickPowerAction\\res\\QuickPowerAction.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////

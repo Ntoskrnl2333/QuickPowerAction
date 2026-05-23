@@ -36,7 +36,14 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBnClickedExecute();
-	afx_msg void OnBnClickedRadioPowerAction(UINT nID);
+	afx_msg void OnBnClickedRadioShutdown();
+	afx_msg void OnBnClickedRadioReboot();
+	afx_msg void OnBnClickedRadioLock();
+	afx_msg void OnBnClickedRadioLogoff();
+	afx_msg void OnBnClickedRadioSleep();
+	afx_msg void OnBnClickedRadioHibernate();
+	afx_msg void OnBnClickedBtnHelp();
+	void SetRadioState(int nIndex);
 	DECLARE_MESSAGE_MAP()
 
 private:

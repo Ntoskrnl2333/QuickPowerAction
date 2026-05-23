@@ -321,8 +321,7 @@
     <ClCompile Include="QuickPowerAction.cpp" />
     <ClCompile Include="QuickPowerActionDlg.cpp" />
     <!-- 测试源文件 -->
-    <ClCompile Include="CoreLayer_test.cpp"
-           Condition="'$(Configuration)'=='Test'">
+    <ClCompile Include="CoreLayer_test.cpp" Condition="'$(Configuration)'=='Test'">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;NOMINMAX;UNIT_TEST_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -334,6 +333,11 @@
     <None Include="res\QuickPowerAction.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bitmap1.bmp" />
+    <Image Include="res\bitmap2.bmp" />
+    <Image Include="res\bitmap3.bmp" />
+    <Image Include="res\icon\256.png" />
+    <Image Include="res\QuickPowerAction.bmp" />
     <Image Include="res\QuickPowerAction.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
