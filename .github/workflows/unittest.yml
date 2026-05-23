@@ -16,11 +16,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Visual Studio MFC Component
+      - name: Install MFC
+        shell: powershell
         run: |
-          $vsInstall = & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          Write-Host "Visual Studio installation path: $vsInstall"
-          & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath "$vsInstall" --add Microsoft.VisualStudio.Component.VC.MFC --passive --norestart
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          $vsInstall = & $vswhere `
+            -latest `
+            -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+
+          Write-Host "VS Install Path: $vsInstall"
+
+          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe" modify `
+            --installPath "$vsInstall" `
+            --add Microsoft.VisualStudio.Component.VC.ATLMFC `
+            --passive `
+            --norestart `
+            --force
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
