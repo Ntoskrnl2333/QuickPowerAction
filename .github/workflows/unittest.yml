@@ -24,37 +24,47 @@ jobs:
 
           Write-Host "VS Installation Path: $installPath"
 
-          # Use vs_developer.exe or vs_installer.exe for modifications
+          # Use vs_installer.exe for modifications
           $vsInstaller = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
 
           if (Test-Path $vsInstaller) {
             Write-Host "Using vs_installer.exe"
+            
+            # Install MFC with both x86 and x64 toolsets
             & $vsInstaller modify `
-              --installPath "`"$installPath`"" `
+              --installPath "`"$($installPath -replace '\\', '\\')`"" `
               --add Microsoft.VisualStudio.Component.VC.ATLMFC `
-              --add Microsoft.VisualStudio.Component.MFC.ATL `
-              --add Microsoft.VisualStudio.Workload.ManagedDesktop `
+              --add Microsoft.VisualStudio.Component.VC.MFC.Atl `
+              --add Microsoft.VisualStudio.Workload.NativeDesktop `
               --includeRecommended `
               --norestart `
               --passive `
               --wait
             
             if ($LASTEXITCODE -ne 0) {
-              Write-Warning "MFC installation returned code $LASTEXITCODE"
+              throw "MFC installation failed with code $LASTEXITCODE"
             }
           } else {
             throw "Visual Studio installer not found!"
           }
 
           # Wait a moment for installation to complete
-          Start-Sleep -Seconds 5
+          Start-Sleep -Seconds 10
 
           # Verify MFC components exist
           $mfcPath = Join-Path $installPath "VC\Atlmfc"
           if (Test-Path $mfcPath) {
             Write-Host "MFC installed successfully at: $mfcPath"
+            Get-ChildItem $mfcPath | Select-Object Name
           } else {
             Write-Warning "MFC path not found at: $mfcPath"
+          }
+          
+          # Show all MFC related files
+          Write-Host "Checking for MFC libraries..."
+          $mfcLibPath = Join-Path $installPath "VC\lib"
+          if (Test-Path $mfcLibPath) {
+            Get-ChildItem $mfcLibPath -Filter "mfc*.lib" | Select-Object Name -First 10
           }
 
       - name: Setup MSBuild
