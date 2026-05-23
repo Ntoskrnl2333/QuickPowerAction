@@ -17,48 +17,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install MFC
-        shell: pwsh
+        shell: cmd
         run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $installPath = & $vswhere -latest -products * -property installationPath
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do (
+            set VS_PATH=%%i
+          )
 
-          Write-Host "VS Installation Path: $installPath"
-
-          # Use vs_installer.exe for modifications
-          $vsInstaller = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-
-          if (Test-Path $vsInstaller) {
-            Write-Host "Using vs_installer.exe"
-            
-            # Install MFC
-            Write-Host "Running: $vsInstaller modify --installPath `"$installPath`" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --wait --norestart"
-            & $vsInstaller modify --installPath "$installPath" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --wait --norestart --force
-            
-            if ($LASTEXITCODE -ne 0) {
-              throw "MFC installation failed with code $LASTEXITCODE"
-            }
-          } else {
-            throw "Visual Studio installer not found!"
-          }
-
-          # Wait a moment for installation to complete
-          Start-Sleep -Seconds 10
-
-          # Verify MFC components exist
-          $mfcPath = Join-Path $installPath "VC\Atlmfc"
-          if (Test-Path $mfcPath) {
-            Write-Host "MFC installed successfully at: $mfcPath"
-            Get-ChildItem $mfcPath | Select-Object Name
-          } else {
-            Write-Warning "MFC path not found at: $mfcPath"
-          }
-          
-          # Show all MFC related files
-          Write-Host "Checking for MFC libraries..."
-          $mfcLibPath = Join-Path $installPath "VC\lib"
-          if (Test-Path $mfcLibPath) {
-            Get-ChildItem $mfcLibPath -Filter "mfc*.lib" | Select-Object Name -First 10
-          }
+          "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe" modify ^
+          --installPath "%VS_PATH%" ^
+          --add Microsoft.VisualStudio.Workload.NativeDesktop ^
+          --add Microsoft.VisualStudio.Component.VC.ATLMFC ^
+          --includeRecommended ^
+          --passive --norestart
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
