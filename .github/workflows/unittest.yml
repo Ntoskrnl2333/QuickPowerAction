@@ -30,16 +30,9 @@ jobs:
           if (Test-Path $vsInstaller) {
             Write-Host "Using vs_installer.exe"
             
-            # Install MFC with both x86 and x64 toolsets
-            & $vsInstaller modify `
-              --installPath "`"$($installPath -replace '\\', '\\')`"" `
-              --add Microsoft.VisualStudio.Component.VC.ATLMFC `
-              --add Microsoft.VisualStudio.Component.VC.MFC.Atl `
-              --add Microsoft.VisualStudio.Workload.NativeDesktop `
-              --includeRecommended `
-              --norestart `
-              --passive `
-              --wait
+            # Install MFC
+            Write-Host "Running: $vsInstaller modify --installPath `"$installPath`" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --wait --norestart"
+            & $vsInstaller modify --installPath "$installPath" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --wait --norestart --force
             
             if ($LASTEXITCODE -ne 0) {
               throw "MFC installation failed with code $LASTEXITCODE"
