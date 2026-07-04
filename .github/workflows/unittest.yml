@@ -61,7 +61,7 @@ jobs:
         run: choco install imagemagick -y
 
       - name: Build icon
-        run: ./res/icon/build.bat
+        run: cd ./res/icon & ./build.bat
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
