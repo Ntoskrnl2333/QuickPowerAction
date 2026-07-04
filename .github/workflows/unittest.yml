@@ -57,6 +57,12 @@ jobs:
             }
           }
 
+      - name: Install magick
+        run: winget install ImageMagick.ImageMagick.Q8
+
+      - name: Build icon
+        run: ./res/icon/build.bat
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
