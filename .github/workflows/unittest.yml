@@ -56,9 +56,9 @@ jobs:
               Get-ChildItem "$vsPath\VC\Tools\MSVC" -ErrorAction SilentlyContinue | Select-Object Name
             }
           }
-
+      
       - name: Install magick
-        run: winget install ImageMagick.ImageMagick.Q8
+        run: choco install imagemagick -y
 
       - name: Build icon
         run: ./res/icon/build.bat
