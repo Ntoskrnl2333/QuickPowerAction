@@ -80,10 +80,9 @@ jobs:
       - name: Run Unit Tests
         shell: pwsh
         run: |
-          # Normalize platform: x86 maps to Win32 in the vcxproj
-          $platformDir = "${{ matrix.platform }}"
-          if ($platformDir -eq "x86") { $platformDir = "Win32" }
-          $exePath = "${platformDir}\Test\QuickPowerAction.exe"
+          # OutDir for Test|x64  -> x64\Test\
+          # OutDir for Test|x86  -> x86\Test\ (hardcoded in vcxproj, maps Win32 to x86)
+          $exePath = "${{ matrix.platform }}\Test\QuickPowerAction.exe"
           Write-Host "Running tests from: $exePath"
           if (-not (Test-Path $exePath)) {
             Write-Error "Test executable not found at $exePath"
