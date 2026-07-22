@@ -57,11 +57,16 @@ jobs:
             }
           }
       
-      - name: Install magick
-        run: choco install imagemagick -y
+      - name: Install ImageMagick
+        shell: pwsh
+        run: choco install imagemagick -y --no-progress
 
-      - name: Build icon
-        run: cd ./res/icon & cmd /c ./build.bat
+      - name: Generate application icon
+        shell: pwsh
+        run: |
+          Push-Location res/icon
+          & .\build.bat
+          Pop-Location
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -73,7 +78,16 @@ jobs:
         run: msbuild QuickPowerAction.sln /p:Configuration=Test /p:Platform="${{ matrix.platform }}" /m /verbosity:minimal
 
       - name: Run Unit Tests
+        shell: pwsh
         run: |
-          $exePath = "Build\${{ matrix.platform }}\Test\QuickPowerAction.exe"
+          # Normalize platform: x86 maps to Win32 in the vcxproj
+          $platformDir = "${{ matrix.platform }}"
+          if ($platformDir -eq "x86") { $platformDir = "Win32" }
+          $exePath = "${platformDir}\Test\QuickPowerAction.exe"
           Write-Host "Running tests from: $exePath"
+          if (-not (Test-Path $exePath)) {
+            Write-Error "Test executable not found at $exePath"
+            Get-ChildItem -Recurse -Filter *.exe
+            exit 1
+          }
           & $exePath
