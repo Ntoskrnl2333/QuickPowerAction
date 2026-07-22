@@ -144,10 +144,23 @@ jobs:
         run: |
           $ver = "${{ steps.extract-version.outputs.version }}"
           New-Item -ItemType Directory -Force -Path output
-          Copy-Item x64/Debug/QuickPowerAction.exe "output/QuickPowerAction x64 Debug $ver.exe"
-          Copy-Item x86/Debug/QuickPowerAction.exe "output/QuickPowerAction x86 Debug $ver.exe"
-          Copy-Item x64/Release/QuickPowerAction.exe "output/QuickPowerAction x64 $ver.exe"
-          Copy-Item x86/Release/QuickPowerAction.exe "output/QuickPowerAction x86 $ver.exe"
+
+          # Debug x64
+          Copy-Item x64/Debug/QuickPowerAction.exe "output/QuickPowerAction_x64_Debug_$ver.exe"
+          Copy-Item x64/Debug/QuickPowerAction.pdb "output/QuickPowerAction_x64_Debug_$ver.pdb" -ErrorAction SilentlyContinue
+
+          # Debug x86
+          Copy-Item x86/Debug/QuickPowerAction.exe "output/QuickPowerAction_x86_Debug_$ver.exe"
+          Copy-Item x86/Debug/QuickPowerAction.pdb "output/QuickPowerAction_x86_Debug_$ver.pdb" -ErrorAction SilentlyContinue
+
+          # Release x64
+          Copy-Item x64/Release/QuickPowerAction.exe "output/QuickPowerAction_x64_$ver.exe"
+          Copy-Item x64/Release/QuickPowerAction.pdb "output/QuickPowerAction_x64_$ver.pdb" -ErrorAction SilentlyContinue
+
+          # Release x86
+          Copy-Item x86/Release/QuickPowerAction.exe "output/QuickPowerAction_x86_$ver.exe"
+          Copy-Item x86/Release/QuickPowerAction.pdb "output/QuickPowerAction_x86_$ver.pdb" -ErrorAction SilentlyContinue
+
           Get-ChildItem output
 
       - name: Create Release
@@ -158,8 +171,12 @@ jobs:
           body_path: changelog.md
           prerelease: true
           files: |
-            output/QuickPowerAction x64 Debug ${{ steps.extract-version.outputs.version }}.exe
-            output/QuickPowerAction x86 Debug ${{ steps.extract-version.outputs.version }}.exe
-            output/QuickPowerAction x64 ${{ steps.extract-version.outputs.version }}.exe
-            output/QuickPowerAction x86 ${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x64_Debug_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x64_Debug_${{ steps.extract-version.outputs.version }}.pdb
+            output/QuickPowerAction_x86_Debug_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x86_Debug_${{ steps.extract-version.outputs.version }}.pdb
+            output/QuickPowerAction_x64_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x64_${{ steps.extract-version.outputs.version }}.pdb
+            output/QuickPowerAction_x86_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x86_${{ steps.extract-version.outputs.version }}.pdb
           generate_release_notes: false
