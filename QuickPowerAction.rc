@@ -54,8 +54,8 @@ BEGIN
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
     "LANGUAGE 4, 2\r\n"
-    "#include ""res\\QuickPowerAction.rc2""
-    "#include ""l.CHS\\afxres.rc""
+    "#include ""res\\QuickPowerAction.rc2""\n"
+    "#include ""l.CHS\\afxres.rc""\n"
     "#endif\r\n"
     "\0"
 END
