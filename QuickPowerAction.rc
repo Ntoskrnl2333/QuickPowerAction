@@ -54,8 +54,8 @@ BEGIN
     "\r\n"
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
     "LANGUAGE 4, 2\r\n"
-    "#include ""res\\QuickPowerAction.rc2""  // 闂?Microsoft Visual C++ 缂傛牞绶惃鍕カ濠?\n"
-    "#include ""l.CHS\\afxres.rc""      // 閺嶅洤鍣紒鍕\r\n"
+    "#include ""res\\QuickPowerAction.rc2""
+    "#include ""l.CHS\\afxres.rc""
     "#endif\r\n"
     "\0"
 END
@@ -73,7 +73,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "关于 QuickPowerAction"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    CONTROL         IDB_MAINFRAME,IDC_STATIC,"Static",SS_BITMAP,14,14,79,71
+    CONTROL         IDB_MAINFRAME,IDC_STATIC,"Static",SS_BITMAP,6,7,79,71
     LTEXT           "QuickPowerAction，版本 2.0.0.2",IDC_STATIC,42,14,114,8,SS_NOPREFIX
     LTEXT           "以 Apache-2.0 开源许可证开源。",IDC_STATIC,42,26,114,8
     DEFPUSHBUTTON   "确定",IDOK,113,41,50,14,WS_GROUP
@@ -226,8 +226,8 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 LANGUAGE 4, 2
-#include "res\QuickPowerAction.rc2"  // 闈?Microsoft Visual C++ 缂栬緫鐨勮祫婧?
-#include "l.CHS\afxres.rc"      // 鏍囧噯缁勪欢
+#include "res\QuickPowerAction.rc2"  // 闂?Microsoft Visual C++ 缂傚倹鐗炵欢顐︽儍閸曨喚銈繝?
+#include "l.CHS\afxres.rc"      // 闁哄秴娲ら崳顖滅磼閸曨亝顐?
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
