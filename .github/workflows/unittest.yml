@@ -68,6 +68,17 @@ jobs:
           & .\build.bat
           Pop-Location
 
+      - name: Install ImageMagick
+        shell: pwsh
+        run: choco install imagemagick -y --no-progress
+
+      - name: Generate application icon
+        shell: pwsh
+        run: |
+          Push-Location res/icon
+          & .\build.bat
+          Pop-Location
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
