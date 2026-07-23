@@ -68,35 +68,36 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+IDD_ABOUTBOX DIALOGEX 0, 0, 230, 72
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "关于 QuickPowerAction"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    CONTROL         IDB_MAINFRAME,IDC_STATIC,"Static",SS_BITMAP,6,7,79,71
-    LTEXT           "QuickPowerAction，版本 2.0.0.2",IDC_STATIC,42,14,114,8,SS_NOPREFIX
-    LTEXT           "以 Apache-2.0 开源许可证开源。",IDC_STATIC,42,26,114,8
-    DEFPUSHBUTTON   "确定",IDOK,113,41,50,14,WS_GROUP
+    CONTROL         IDR_MAINFRAME,IDC_STATIC,"Static",SS_ICON,12,12,22,22
+    LTEXT           "QuickPowerAction，版本 2.0.0.2",IDC_STATIC,44,14,176,10,SS_NOPREFIX
+    LTEXT           "以 Apache-2.0 开源许可证开源。",IDC_STATIC,44,28,176,10
+    DEFPUSHBUTTON   "确定",IDOK,172,50,50,14,WS_GROUP
 END
 
-IDD_QUICKPOWERACTION_DIALOG DIALOGEX 0, 0, 280, 150
+IDD_QUICKPOWERACTION_DIALOG DIALOGEX 0, 0, 260, 140
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
+CAPTION "QuickPowerAction"
 FONT 9, "Microsoft YaHei UI", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "电源操作",IDC_STATIC_POWER_ACTION,7,7,265,82
-    RADIOBUTTON     "关机",IDC_RADIO_SHUTDOWN,14,20,75,10,WS_GROUP
-    RADIOBUTTON     "重启",IDC_RADIO_REBOOT,14,34,75,10
-    RADIOBUTTON     "锁屏",IDC_RADIO_LOCK,14,48,75,10
-    RADIOBUTTON     "注销",IDC_RADIO_LOGOFF,100,20,75,10
-    RADIOBUTTON     "睡眠",IDC_RADIO_SLEEP,100,34,75,10
-    RADIOBUTTON     "休眠",IDC_RADIO_HIBERNATE,100,48,75,10
-    LTEXT           "睡眠模式:",IDC_STATIC_SLEEP_MODE,14,65,50,8
-    COMBOBOX        IDC_COMBO_SLEEP_MODE,66,62,90,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "强制执行",IDC_CHECK_FORCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,62,85,14
-    DEFPUSHBUTTON   "执行",IDC_BTN_EXECUTE,15,102,115,14
-    PUSHBUTTON      "取消",IDCANCEL,140,102,115,14
-    PUSHBUTTON      "关于",IDC_BTN_HELP,95,123,80,14
+    GROUPBOX        "电源操作",IDC_STATIC_POWER_ACTION,7,7,246,68
+    RADIOBUTTON     "关机",IDC_RADIO_SHUTDOWN,18,22,60,10,WS_GROUP
+    RADIOBUTTON     "重启",IDC_RADIO_REBOOT,18,37,60,10
+    RADIOBUTTON     "锁屏",IDC_RADIO_LOCK,18,52,60,10
+    RADIOBUTTON     "注销",IDC_RADIO_LOGOFF,95,22,60,10
+    RADIOBUTTON     "睡眠",IDC_RADIO_SLEEP,95,37,60,10
+    RADIOBUTTON     "休眠",IDC_RADIO_HIBERNATE,95,52,60,10
+    CONTROL         "强制执行",IDC_CHECK_FORCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,172,22,70,10
+    LTEXT           "睡眠模式:",IDC_STATIC_SLEEP_MODE,12,85,40,8
+    COMBOBOX        IDC_COMBO_SLEEP_MODE,55,83,110,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "执行",IDC_BTN_EXECUTE,90,112,50,14
+    PUSHBUTTON      "取消",IDCANCEL,145,112,50,14
+    PUSHBUTTON      "关于...",IDC_BTN_HELP,200,112,50,14
 END
 
 
@@ -150,17 +151,15 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 6
-        RIGHTMARGIN, 163
+        RIGHTMARGIN, 223
         TOPMARGIN, 7
-        BOTTOMMARGIN, 55
+        BOTTOMMARGIN, 63
     END
 
     IDD_QUICKPOWERACTION_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 273
         TOPMARGIN, 7
-        BOTTOMMARGIN, 143
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -174,10 +173,10 @@ END
 IDD_ABOUTBOX AFX_DIALOG_LAYOUT
 BEGIN
     0,
-    0, 0, 10, 100,
     0, 0, 0, 0,
     0, 0, 0, 0,
-    0, 0, 0, 0
+    0, 0, 0, 0,
+    0, 0, 10, 100
 END
 
 
@@ -188,7 +187,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "C:\\Users\\35150\\source\\repos\\QuickPowerAction\\res\\QuickPowerAction.ico"
+IDR_MAINFRAME           ICON                    "res\\QuickPowerAction.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -196,7 +195,7 @@ IDR_MAINFRAME           ICON                    "C:\\Users\\35150\\source\\repos
 // Bitmap
 //
 
-IDB_MAINFRAME           BITMAP                  "C:\\Users\\35150\\source\\repos\\QuickPowerAction\\res\\QuickPowerAction.bmp"
+IDB_MAINFRAME           BITMAP                  "res\\QuickPowerAction.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -226,8 +225,8 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 LANGUAGE 4, 2
-#include "res\QuickPowerAction.rc2"  // 闂?Microsoft Visual C++ 缂傚倹鐗炵欢顐︽儍閸曨喚銈繝?
-#include "l.CHS\afxres.rc"      // 闁哄秴娲ら崳顖滅磼閸曨亝顐?
+#include "res\QuickPowerAction.rc2"
+#include "l.CHS\afxres.rc"
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
