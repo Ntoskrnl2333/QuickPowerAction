@@ -273,6 +273,9 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;NOMINMAX;UNIT_TEST_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>cd .\res\icon\ &amp; build.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
@@ -298,6 +301,9 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;NOMINMAX;UNIT_TEST_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PreBuildEvent>
+      <Command>cd .\res\icon\ &amp; build.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CoreLayer.h" />
@@ -333,10 +339,6 @@
     <None Include="res\QuickPowerAction.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\bitmap1.bmp" />
-    <Image Include="res\bitmap2.bmp" />
-    <Image Include="res\bitmap3.bmp" />
-    <Image Include="res\icon\256.png" />
     <Image Include="res\QuickPowerAction.bmp" />
     <Image Include="res\QuickPowerAction.ico" />
   </ItemGroup>
