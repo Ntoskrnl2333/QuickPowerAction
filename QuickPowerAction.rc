@@ -74,7 +74,7 @@ CAPTION "关于 QuickPowerAction"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,15,16,10,9
-    LTEXT           "QuickPowerAction，版本 2.0.0.2",IDC_STATIC,44,14,176,10,SS_NOPREFIX
+    LTEXT           "QuickPowerAction，版本 2.0.1.0",IDC_STATIC,44,14,176,10,SS_NOPREFIX
     LTEXT           "以 Apache-2.0 开源许可证开源。",IDC_STATIC,44,28,176,10
     DEFPUSHBUTTON   "确定",IDOK,172,50,50,14,WS_GROUP
 END
@@ -107,8 +107,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,2
- PRODUCTVERSION 2,0,0,2
+ FILEVERSION 2,0,1,0
+ PRODUCTVERSION 2,0,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -125,12 +125,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Ntoskrnl2333"
             VALUE "FileDescription", "QuickPowerAction"
-            VALUE "FileVersion", "Nightly 2.0.0.2"
+            VALUE "FileVersion", "Nightly 2.0.1.0"
             VALUE "InternalName", "QuickPowerAction.exe"
             VALUE "LegalCopyright", "Ntoskrnl2333  Published under the Apache-2.0 license"
             VALUE "OriginalFilename", "QuickPowerAction.exe"
             VALUE "ProductName", "Ntoskrnl2333"
-            VALUE "ProductVersion", "Nightly 2.0.0.2"
+            VALUE "ProductVersion", "Nightly 2.0.1.0"
         END
     END
     BLOCK "VarFileInfo"
