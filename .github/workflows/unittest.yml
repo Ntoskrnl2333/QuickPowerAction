@@ -56,6 +56,17 @@ jobs:
               Get-ChildItem "$vsPath\VC\Tools\MSVC" -ErrorAction SilentlyContinue | Select-Object Name
             }
           }
+      
+      - name: Install ImageMagick
+        shell: pwsh
+        run: choco install imagemagick -y --no-progress
+
+      - name: Generate application icon
+        shell: pwsh
+        run: |
+          Push-Location res/icon
+          & .\build.bat
+          Pop-Location
 
       - name: Install ImageMagick
         shell: pwsh

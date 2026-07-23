@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: windows-latest
+    runs-on: windows-2022
     permissions:
       contents: write
     outputs:
@@ -18,6 +18,46 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install MFC
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * -property installationPath
+          Write-Host "VS installation path: $vsPath"
+
+          Write-Host "Searching for existing MFC libraries..."
+          $mfcLibs = @(Get-ChildItem "$vsPath\VC\Tools\MSVC\*\atlmfc\lib\*\mfc*.lib" -ErrorAction SilentlyContinue)
+          if ($mfcLibs.Count -gt 0) {
+            Write-Host "MFC libraries already installed: $($mfcLibs.Count) files found"
+          } else {
+            Write-Host "MFC libraries not found. Attempting installation..."
+            & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe" modify `
+              --installPath "$vsPath" `
+              --add Microsoft.VisualStudio.Component.VC.ATLMFC `
+              --passive --wait --norestart --force
+
+            if ($LASTEXITCODE -ne 0) {
+              throw "MFC installation failed with exit code $LASTEXITCODE"
+            }
+
+            Start-Sleep -Seconds 3
+            $mfcLibs = @(Get-ChildItem "$vsPath\VC\Tools\MSVC\*\atlmfc\lib\*\mfc*.lib" -ErrorAction SilentlyContinue)
+            if ($mfcLibs.Count -eq 0) {
+              Write-Warning "MFC verification failed, but continuing..."
+            } else {
+              Write-Host "MFC installation verified: $($mfcLibs.Count) library files found"
+            }
+          }
+
+      - name: Install ImageMagick & Generate Icons
+        shell: powershell
+        run: |
+          # Install ImageMagick (required by res/icon/build.bat for PreBuildEvent)
+          choco install imagemagick -y --no-progress
+          # Verify magick is available
+          magick --version
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -46,7 +86,6 @@ jobs:
           $match = [regex]::Match($content, 'VALUE\s+"ProductVersion",\s+"([^"]+)"')
           if ($match.Success) {
             $rawVersion = $match.Groups[1].Value
-            # Extract just the version number (e.g., "2.0.0.1" from "Nightly 2.0.0.1")
             $versionMatch = [regex]::Match($rawVersion, '(\d+\.\d+\.\d+\.\d+)')
             if ($versionMatch.Success) {
               $version = $versionMatch.Groups[1].Value
@@ -76,48 +115,68 @@ jobs:
             Write-Host "No previous tags found, using all commits"
             $commits = git log --pretty=format:"- %s" --no-merges
           }
-          
+
           $feat = @()
           $fix = @()
           $chore = @()
           $other = @()
-          
+
           foreach ($commit in $commits) {
             if ($commit -match "^\- feat") { $feat += $commit }
             elseif ($commit -match "^\- fix") { $fix += $commit }
             elseif ($commit -match "^\- chore") { $chore += $commit }
             else { $other += $commit }
           }
-          
+
           $changelog = "## 📋 Changelog`n`n"
           if ($feat) { $changelog += "### ✨ Features`n" + ($feat -join "`n") + "`n`n" }
-          if ($fix) { $changelog += "### 🐛 Fix`n" + ($fix -join "`n") + "`n`n" }
+          if ($fix) { $changelog += "### 🐛 Fixes`n" + ($fix -join "`n") + "`n`n" }
           if ($chore) { $changelog += "### 🔧 Toolchains`n" + ($chore -join "`n") + "`n`n" }
           if ($other) { $changelog += "### 📝 Others`n" + ($other -join "`n") + "`n`n" }
-          
+
           $changelogPath = "changelog.md"
           $changelog | Out-File -FilePath $changelogPath -Encoding utf8
           Write-Host "Generated changelog:"
           Get-Content $changelogPath
 
       - name: Prepare artifacts
+        shell: pwsh
         run: |
-          mkdir output
-          cp x64/Debug/QuickPowerAction.exe "output/QuickPowerAction x64 Debug $rawVersion.exe"
-          cp x86/Debug/QuickPowerAction.exe "output/QuickPowerAction x86 Debug $rawVersion.exe"
-          cp x64/Release/QuickPowerAction.exe "output/QuickPowerAction x64 $rawVersion.exe"
-          cp x86/Release/QuickPowerAction.exe "output/QuickPowerAction x86 $rawVersion.exe"
+          $ver = "${{ steps.extract-version.outputs.version }}"
+          New-Item -ItemType Directory -Force -Path output
+
+          # Debug x64
+          Copy-Item x64/Debug/QuickPowerAction.exe "output/QuickPowerAction_x64_Debug_$ver.exe"
+          Copy-Item x64/Debug/QuickPowerAction.pdb "output/QuickPowerAction_x64_Debug_$ver.pdb" -ErrorAction SilentlyContinue
+
+          # Debug x86
+          Copy-Item x86/Debug/QuickPowerAction.exe "output/QuickPowerAction_x86_Debug_$ver.exe"
+          Copy-Item x86/Debug/QuickPowerAction.pdb "output/QuickPowerAction_x86_Debug_$ver.pdb" -ErrorAction SilentlyContinue
+
+          # Release x64
+          Copy-Item x64/Release/QuickPowerAction.exe "output/QuickPowerAction_x64_$ver.exe"
+          Copy-Item x64/Release/QuickPowerAction.pdb "output/QuickPowerAction_x64_$ver.pdb" -ErrorAction SilentlyContinue
+
+          # Release x86
+          Copy-Item x86/Release/QuickPowerAction.exe "output/QuickPowerAction_x86_$ver.exe"
+          Copy-Item x86/Release/QuickPowerAction.pdb "output/QuickPowerAction_x86_$ver.pdb" -ErrorAction SilentlyContinue
+
+          Get-ChildItem output
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.extract-version.outputs.tag }}
           name: "Nightly Build ${{ steps.extract-version.outputs.version }} - ${{ github.event.head_commit.timestamp }}T"
           body_path: changelog.md
           prerelease: true
           files: |
-            output/QuickPowerAction x64 Debug $rawVersion.exe
-            output/QuickPowerAction x86 Debug $rawVersion.exe
-            output/QuickPowerAction x64 $rawVersion.exe
-            output/QuickPowerAction x86 $rawVersion.exe
+            output/QuickPowerAction_x64_Debug_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x64_Debug_${{ steps.extract-version.outputs.version }}.pdb
+            output/QuickPowerAction_x86_Debug_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x86_Debug_${{ steps.extract-version.outputs.version }}.pdb
+            output/QuickPowerAction_x64_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x64_${{ steps.extract-version.outputs.version }}.pdb
+            output/QuickPowerAction_x86_${{ steps.extract-version.outputs.version }}.exe
+            output/QuickPowerAction_x86_${{ steps.extract-version.outputs.version }}.pdb
           generate_release_notes: false
