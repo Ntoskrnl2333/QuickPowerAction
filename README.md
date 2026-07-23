@@ -1,8 +1,8 @@
 # QuickPowerAction
 
-[![Unit Tests](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/unittest.yml/badge.svg?branch=develop)](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/unittest.yml)
-[![Nightly Build](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/nightly.yml/badge.svg?branch=develop)](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/nightly.yml)
-[![Release](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/release.yml/badge.svg)](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/release.yml)
+## Workflows
+[![Unit Tests](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/unittest.yml/badge.svg)](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/unittest.yml)
+[![Nightly Build](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/nightly.yml/badge.svg)](https://github.com/Ntoskrnl2333/QuickPowerAction/actions/workflows/nightly.yml)
 
 Windows 快捷电源操作工具。提供关机、重启、锁屏、注销、睡眠、休眠的快速执行入口。
 
